@@ -1,11 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { createClient } from "../../lib/supabase/client.js";
 
 import { styles } from "../../lib/entry-form-styles.js";
 import { ALLOWED_TYPES, MAX_FILE_SIZE, MAX_TITLE_LENGTH, getYouTubeId, validateEntry, entryWarnings } from "../../lib/entry-validation.js";
+
+// Same back link as the review page, so every view can return home.
+const backLink = (
+  <Link href="/" style={{ color: "#2EE6A8", display: "inline-block", marginBottom: 24, textDecoration: "none" }}>
+    ← Back to Browse
+  </Link>
+);
 
 export default function ContributePage() {
   const [supabase] = useState(() => createClient());
@@ -235,6 +243,7 @@ export default function ContributePage() {
     return (
       <main style={styles.page}>
         <div style={styles.container}>
+          {backLink}
           <div style={styles.kicker}>CONTRIBUTE</div>
           <h1 style={styles.title}>Add to the archive</h1>
 
@@ -257,6 +266,7 @@ export default function ContributePage() {
     return (
       <main style={styles.page}>
         <div style={styles.container}>
+          {backLink}
           <div style={styles.kicker}>CONTRIBUTE / ចូលរួមចំណែក</div>
           <h1 style={styles.title}>Add to the archive</h1>
 
@@ -276,6 +286,7 @@ export default function ContributePage() {
   return (
     <main style={styles.page}>
       <div style={styles.container}>
+        {backLink}
         <div style={styles.kicker}>CONTRIBUTE / ចូលរួមចំណែក</div>
 
         <h1 style={styles.title}>Add to the archive</h1>
