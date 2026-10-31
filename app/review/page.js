@@ -1,65 +1,45 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import ReviewQueueItem from "../../components/ReviewQueueItem.js";
+import ReviewQueue from "../../components/ReviewQueue.js";
 import { styles } from "../../lib/entry-form-styles.js";
-import { useArchiveUser } from "../../lib/use-archive-user.js";
+import { createClient } from "../../lib/supabase/server.js";
 
-export default function ReviewPage() {
-  const { user, loading, supabase } = useArchiveUser();
-  const [queue, setQueue] = useState({ userId: null, isReviewer: false, entries: [], loading: true, error: "" });
+// Runs on the server, before any entries load. Hiding this page is politeness.
+// The database is the gate: review_entry refuses anyone who is not a reviewer.
+async function loadQueue() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { view: "login" };
 
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    const done = (changes) => { if (active) setQueue({ userId: user.id, isReviewer: false, entries: [], loading: false, error: "", ...changes }); };
-    setQueue({ userId: user.id, isReviewer: false, entries: [], loading: true, error: "" });
+  const { data: isReviewer, error: checkError } = await supabase.rpc("is_reviewer");
+  if (checkError) return { view: "error" };
+  if (isReviewer !== true) return { view: "forbidden" };
 
-    async function loadQueue() {
-      // Hiding this page is politeness. The database is the gate: review_entry
-      // refuses anyone who is not on the reviewers list.
-      const { data: isReviewer } = await supabase.rpc("is_reviewer");
-      if (isReviewer !== true) return done({});
-      const { data, error } = await supabase.from("entries")
-        .select("id, title_en, title_kh, contributor_en, contributor_kh, created_at")
-        .eq("status", "pending")
-        .order("created_at", { ascending: true });
-      done({ isReviewer: true, entries: data || [], error: error ? "Unable to load the review queue. Please try again." : "" });
-    }
-    loadQueue().catch(() => done({ error: "Unable to load the review queue. Please check your connection and try again." }));
-    return () => { active = false; };
-  }, [supabase, user?.id]);
+  const { data, error } = await supabase.from("entries")
+    .select("id, title_en, title_kh, contributor_en, contributor_kh, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  if (error) return { view: "error" };
+  return { view: "queue", entries: data || [] };
+}
 
-  function removeReviewed(id) {
-    setQueue((current) => ({ ...current, entries: current.entries.filter((entry) => entry.id !== id) }));
-  }
+export default async function ReviewPage() {
+  const queue = await loadQueue();
 
   let content;
-  if (loading) {
-    content = <p style={styles.description}>Checking your account...</p>;
-  } else if (!user) {
+  if (queue.view === "login") {
     content = <div style={styles.loginPrompt}>
       <p role="alert" style={styles.loginMessage}>Please log in to review entries.</p>
       <Link href="/login" style={styles.loginButton}>Log in</Link>
     </div>;
-  } else if (queue.loading || queue.userId !== user.id) {
-    content = <p style={styles.description}>Loading the review queue...</p>;
-  } else if (queue.error) {
-    content = <p role="alert" style={styles.message}>{queue.error}</p>;
-  } else if (!queue.isReviewer) {
-    content = <p role="alert" style={styles.message}>Only reviewers can open the review queue.</p>;
-  } else if (queue.entries.length === 0) {
-    content = <div style={styles.loginPrompt}>
-      <p className="english-text" style={styles.loginMessage}>Nothing is waiting for review.</p>
-      <p className="khmer-text" style={styles.loginMessage}>មិនមានការចូលរួមណាមួយកំពុងរង់ចាំការពិនិត្យទេ។</p>
+  } else if (queue.view === "error") {
+    content = <p role="alert" style={styles.message}>Unable to load the review queue. Please try again.</p>;
+  } else if (queue.view === "forbidden") {
+    content = <div role="alert" style={styles.message}>
+      <p className="english-text" style={{ margin: 0 }}>Only reviewers can open the review queue.</p>
+      <p className="khmer-text" style={{ margin: "4px 0 0" }}>មានតែអ្នកពិនិត្យប៉ុណ្ណោះដែលអាចបើកជួរការពិនិត្យនេះបាន។</p>
     </div>;
   } else {
-    content = <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-      {queue.entries.map((entry) => (
-        <ReviewQueueItem key={entry.id} entry={entry} supabase={supabase} onReviewed={removeReviewed} />
-      ))}
-    </ul>;
+    content = <ReviewQueue initialEntries={queue.entries} />;
   }
 
   return (

@@ -27,16 +27,19 @@ export default async function EntryDetailPage({ params, searchParams }) {
     );
   }
 
-  const row = id ? data : findEntryBySlug(data || [], slug);
-  if (!row && !id) notFound();
+  const found = id ? data : findEntryBySlug(data || [], slug);
+  if (!found && !id) notFound();
+  // The server now reads with the visitor's login, so it can find their own
+  // unpublished entries too. Only published rows go straight to the page.
+  const row = found?.status === "published" ? found : null;
   if (!id) {
-    redirect(`${entryHref(row)}${query ? `?q=${encodeURIComponent(query)}` : ""}`);
+    redirect(`${entryHref(found)}${query ? `?q=${encodeURIComponent(query)}` : ""}`);
   }
 
   return (
     <main className="entry-detail-page" style={styles.page}>
       <Link href="/" style={styles.back}>← Back to Browse</Link>
-      {/* Rows found here are published (the server reads as a logged-out visitor). */}
+      {/* row is only ever a published entry here. */}
       {row && <ReviewerTakeDown id={row.id} title={row.title_en || row.title_kh} />}
       {/* Not published: only the owner or a reviewer can see it, in the browser. */}
       {row ? <EntryDetail row={row} query={query} /> : <PrivateEntry id={id} query={query} />}

@@ -14,25 +14,37 @@ const itemStyles = {
   error: { margin: "10px 0 0", color: "#FF8A8A", fontSize: 14 },
 };
 
+// Failure messages in both languages, like the rest of the archive.
+const MESSAGES = {
+  refused: {
+    en: "This entry was not updated. It may already have been reviewed, or you may no longer be a reviewer.",
+    kh: "ការចូលរួមនេះមិនត្រូវបានកែប្រែទេ។ វាប្រហែលជាត្រូវបានពិនិត្យរួចហើយ ឬអ្នកប្រហែលជាលែងជាអ្នកពិនិត្យហើយ។",
+  },
+  offline: {
+    en: "Unable to save the decision. Please check your connection and try again.",
+    kh: "មិនអាចរក្សាទុកការសម្រេចចិត្តបានទេ។ សូមពិនិត្យការតភ្ជាប់របស់អ្នក ហើយព្យាយាមម្តងទៀត។",
+  },
+};
+
 // One pending entry with the reviewer's two decisions. The database function
 // review_entry is the real check: it refuses non-reviewers and non-pending entries.
 export default function ReviewQueueItem({ entry, supabase, onReviewed }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   async function review(decision) {
     setBusy(true);
-    setError("");
+    setError(null);
     try {
       const { data, error: rpcError } = await supabase.rpc("review_entry", { entry_id: entry.id, decision });
       if (rpcError || data !== true) {
-        setError("This entry was not updated. It may already have been reviewed, or you may no longer be a reviewer.");
+        setError(MESSAGES.refused);
         setBusy(false);
         return;
       }
       onReviewed(entry.id);
     } catch {
-      setError("Unable to save the decision. Please check your connection and try again.");
+      setError(MESSAGES.offline);
       setBusy(false);
     }
   }
@@ -50,7 +62,10 @@ export default function ReviewQueueItem({ entry, supabase, onReviewed }) {
         <button type="button" style={itemStyles.publish} disabled={busy} onClick={() => review("published")}>Publish / ផ្សព្វផ្សាយ</button>
         <button type="button" style={itemStyles.ret} disabled={busy} onClick={() => review("returned")}>Return / ប្រគល់ត្រឡប់</button>
       </div>
-      {error && <p role="alert" style={itemStyles.error}>{error}</p>}
+      {error && <div role="alert" style={itemStyles.error}>
+        <p className="english-text" style={{ margin: 0 }}>{error.en}</p>
+        <p className="khmer-text" style={{ margin: "4px 0 0" }}>{error.kh}</p>
+      </div>}
     </li>
   );
 }
