@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { createClient } from "../../lib/supabase/client.js";
 
@@ -39,6 +39,9 @@ export default function ContributePage() {
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  // A ref changes at once; the submitting state only after a re-render, so a
+  // fast double click could otherwise save the same entry twice.
+  const busy = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -124,6 +127,9 @@ export default function ContributePage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (busy.current) {
+      return;
+    }
     setSubmitError("");
 
     if (!validate()) {
@@ -135,6 +141,7 @@ export default function ContributePage() {
       return;
     }
 
+    busy.current = true;
     setSubmitting(true);
     let uploadedPath = null;
 
@@ -204,7 +211,8 @@ export default function ContributePage() {
 
         await supabase.storage.from("photos").remove([uploadedPath]);
 
-        throw new Error(`ENTRY_SAVE_FAILED: ${insertError.message}`);
+        // The database's own wording stays in the console, not on screen.
+        throw new Error("ENTRY_SAVE_FAILED");
       }
 
       if (!insertedEntry?.id) {
@@ -219,12 +227,13 @@ export default function ContributePage() {
 
       setSubmitError(
         error?.message === "PHOTO_UPLOAD_FAILED"
-          ? "The photo could not be uploaded. Please check the file and try again."
-          : error?.message?.startsWith("ENTRY_SAVE_FAILED:")
-            ? error.message
-            : "Something went wrong while saving your contribution. Please try again."
+          ? "The photo could not be uploaded. Please check the file and try again. មិនអាចផ្ទុករូបភាពឡើងបានទេ។ សូមពិនិត្យឯកសារ ហើយព្យាយាមម្តងទៀត។"
+          : error?.message === "ENTRY_SAVE_FAILED"
+            ? "Your entry was not saved. Please check your entry and try again. ការចូលរួមរបស់អ្នកមិនត្រូវបានរក្សាទុកទេ។ សូមពិនិត្យការចូលរួមរបស់អ្នក ហើយព្យាយាមម្តងទៀត។"
+            : "Something went wrong while saving your contribution. Please try again. មានបញ្ហាពេលរក្សាទុកការចូលរួមរបស់អ្នក។ សូមព្យាយាមម្តងទៀត។"
       );
     } finally {
+      busy.current = false;
       setSubmitting(false);
     }
   }
