@@ -1,12 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { reviewerDeleteEntry } from "../lib/entry-deletion.js";
 import { useArchiveUser } from "../lib/use-archive-user.js";
 
-// Reviewers only: take a published entry off the public shelf by returning it
-// to its contributor. Hiding the button is politeness; take_down_entry in the
-// database refuses non-reviewers and entries that are not published.
+// Reviewers only: delete a published entry and its photo for good. Hiding the
+// button is politeness; the database's delete policies refuse non-reviewers.
 export default function ReviewerTakeDown({ id, title }) {
+  const router = useRouter();
   const { user, supabase } = useArchiveUser();
   const busy = useRef(false);
   const [isReviewer, setIsReviewer] = useState(false);
@@ -28,24 +30,24 @@ export default function ReviewerTakeDown({ id, title }) {
 
   async function handleTakeDown() {
     if (busy.current || finished) return;
-    if (!window.confirm(`Take down “${title || "this entry"}”? The public will no longer see it, and it goes back to its contributor as returned.`)) return;
+    if (!window.confirm(`Take down “${title || "this entry"}”? It will be deleted for good, with its photo. This cannot be undone.`)) return;
     busy.current = true;
     setPending(true);
     setMessage("");
-    try {
-      const { data, error } = await supabase.rpc("take_down_entry", { entry_id: id });
-      if (error || data !== true) {
-        setMessage("This entry was not taken down. It may no longer be published, or you may no longer be a reviewer.");
-        return;
-      }
-      setFinished(true);
-      setMessage("Taken down. The public can no longer see this entry, and its contributor sees it as returned.");
-    } catch {
-      setMessage("Unable to take down this entry. Please check your connection and try again.");
-    } finally {
-      busy.current = false;
-      setPending(false);
+    const result = await reviewerDeleteEntry(supabase, id);
+    busy.current = false;
+    setPending(false);
+    if (!result.deleted) {
+      setMessage(result.error);
+      return;
     }
+    setFinished(true);
+    if (result.warning) {
+      setMessage("Taken down. The entry is deleted, but its photo could not be removed from Storage.");
+      return;
+    }
+    router.push("/");
+    router.refresh();
   }
 
   if (!isReviewer) return null;

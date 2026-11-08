@@ -1,7 +1,7 @@
 -- The Sprint 3 review gate (Lab 10), copied from what is installed in the
 -- live project on 2026-11-03. Run in the Supabase SQL Editor; safe to re-run.
 -- The reviewers table (one user_id per reviewer) was created in Lab 10 and
--- is not recreated here. take_down_entry lives in ReviewerTakeDown.sql.
+-- is not recreated here. Reviewer take down lives in ReviewerDelete.sql.
 begin;
 
 -- New and edited entries wait for review unless something says otherwise.

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deleteEntry } from "../lib/entry-deletion.js";
+import { deleteEntry, reviewerDeleteEntry } from "../lib/entry-deletion.js";
 import { PHOTO_CLEANUP_FAILURE, retryPhotoCleanup } from "../lib/entry-photo-cleanup.js";
 import { cleanupDiagnostic } from "../lib/entry-cleanup-diagnostics.js";
 
@@ -280,4 +280,26 @@ test("temporary diagnostics are disabled outside development", (t) => {
     if (originalMode === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = originalMode;
   }
+});
+
+test("a reviewer deletes another contributor's entry, then removes that contributor's photo", async () => {
+  const { client, calls } = mockClient({ user: { id: OTHER } });
+  const result = await reviewerDeleteEntry(client, ID);
+  assert.equal(result.deleted, true);
+  assert.equal(result.cleanup.status, "removed");
+  assert.deepEqual(calls.loads, [[["id", ID]]]);
+  assert.deepEqual(calls.filters, [["id", ID], ["image", row.image]]);
+  assert.deepEqual(calls.removals, [PHOTO_PATH]);
+});
+
+test("reviewer delete: zero rows (not a reviewer), errors or a bad id never report success or remove a photo", async () => {
+  for (const options of [{ zeroRows: true }, { deleteError: { code: "42501", message: "PRIVATE DATABASE ERROR" } }, { deleteThrows: true }, { missingEntry: true }, { loadThrows: true }]) {
+    const { client, calls } = mockClient(options);
+    const result = await reviewerDeleteEntry(client, ID);
+    assert.equal(result.deleted, false); assert.equal(calls.removals.length, 0);
+    assert.ok(!result.error.includes("PRIVATE"));
+  }
+  const { client, calls } = mockClient();
+  assert.equal((await reviewerDeleteEntry(client, "not-an-id")).deleted, false);
+  assert.equal(calls.loads.length, 0); assert.equal(calls.deletes, 0);
 });
