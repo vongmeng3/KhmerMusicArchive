@@ -184,7 +184,7 @@ export default function Home() {
       if (!isActive) return;
 
       if (error) {
-        setLoadError("Unable to load archive entries. Please try again later.");
+        setLoadError("Unable to load archive entries. Please try again later. មិនអាចផ្ទុកការចូលរួមក្នុងបណ្ណសារបានទេ។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។");
       } else {
         const mappedEntries = (data || []).map((entry) => ({
           ...entry,
@@ -284,7 +284,7 @@ export default function Home() {
 
       <h2 id="collection" className="archive-section-label" style={styles.sectionLabel}>THE COLLECTION</h2>
 
-      {!isLoading && !loadError && (
+      {!isLoading && !loadError && filtered.length > 0 && (
         <p style={styles.count}>
           Showing {displayedCount} of {filtered.length} entries
         </p>
@@ -317,8 +317,20 @@ export default function Home() {
         </div>
       )}
 
+      {/* Empty state: say what was searched and what to try next, in both languages. */}
       {!isLoading && !loadError && filtered.length === 0 && (
-        <p style={styles.none}>No entries found.</p>
+        <div style={styles.none} role="status">
+          <p className="english-text" style={{ margin: 0 }}>
+            {debouncedQuery
+              ? `Nothing in the archive matches “${debouncedQuery}”. Try another word in Khmer or English, or clear the search.`
+              : "No entries have been published yet."}
+          </p>
+          <p className="khmer-text" style={{ margin: "6px 0 0" }}>
+            {debouncedQuery
+              ? `រកមិនឃើញអ្វីដែលត្រូវនឹង «${debouncedQuery}» ទេ។ សូមសាកល្បងពាក្យផ្សេងទៀតជាភាសាខ្មែរ ឬអង់គ្លេស ឬសម្អាតការស្វែងរក។`
+              : "មិនទាន់មានការចូលរួមណាមួយត្រូវបានផ្សព្វផ្សាយនៅឡើយទេ។"}
+          </p>
+        </div>
       )}
 
       {!isLoading && !loadError && filtered.length > 0 && totalPages > 1 && (
