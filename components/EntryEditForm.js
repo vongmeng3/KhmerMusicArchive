@@ -40,7 +40,7 @@ export default function EntryEditForm({ entry, supabase }) {
       router.replace(entryHref(result.entry));
       router.refresh();
     } catch {
-      setMessage("Unable to finish saving. Please check the entry before trying again.");
+      setMessage("Unable to finish saving. Please check the entry before trying again. មិនអាចរក្សាទុកបានចប់សព្វគ្រប់ទេ។ សូមពិនិត្យការចូលរួម មុនពេលព្យាយាមម្តងទៀត។");
     } finally {
       saving.current = false;
       setSubmitting(false);

@@ -28,11 +28,11 @@ export default async function ReviewPage() {
   let content;
   if (queue.view === "login") {
     content = <div style={styles.loginPrompt}>
-      <p role="alert" style={styles.loginMessage}>Please log in to review entries.</p>
+      <p role="alert" style={styles.loginMessage}>Please log in to review entries. សូមចូលគណនី ដើម្បីពិនិត្យការចូលរួម។</p>
       <Link href="/login" style={styles.loginButton}>Log in</Link>
     </div>;
   } else if (queue.view === "error") {
-    content = <p role="alert" style={styles.message}>Unable to load the review queue. Please try again.</p>;
+    content = <p role="alert" style={styles.message}>Unable to load the review queue. Please try again. មិនអាចផ្ទុកជួរការពិនិត្យបានទេ។ សូមព្យាយាមម្តងទៀត។</p>;
   } else if (queue.view === "forbidden") {
     content = <div role="alert" style={styles.message}>
       <p className="english-text" style={{ margin: 0 }}>Only reviewers can open the review queue.</p>

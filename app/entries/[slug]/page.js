@@ -22,7 +22,7 @@ export default async function EntryDetailPage({ params, searchParams }) {
     return (
       <main className="entry-detail-page" style={styles.page}>
         <Link href="/" style={styles.back}>← Back to Browse</Link>
-        <p role="alert" style={styles.text}>Unable to load this entry. Please try again later.</p>
+        <p role="alert" style={styles.text}>Unable to load this entry. Please try again later. មិនអាចផ្ទុកការចូលរួមនេះបានទេ។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។</p>
       </main>
     );
   }

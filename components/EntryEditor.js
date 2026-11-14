@@ -21,10 +21,10 @@ export default function EntryEditor({ id }) {
           .eq("id", id).eq("owner", user.id).maybeSingle();
         if (active) setRecord({
           entry: error ? null : data, userId: user.id, loading: false,
-          error: error ? "Unable to load this entry. Please try again." : "",
+          error: error ? "Unable to load this entry. Please try again. មិនអាចផ្ទុកការចូលរួមនេះបានទេ។ សូមព្យាយាមម្តងទៀត។" : "",
         });
       } catch {
-        if (active) setRecord({ entry: null, userId: user.id, loading: false, error: "Unable to load this entry. Please check your connection and try again." });
+        if (active) setRecord({ entry: null, userId: user.id, loading: false, error: "Unable to load this entry. Please check your connection and try again. មិនអាចផ្ទុកការចូលរួមនេះបានទេ។ សូមពិនិត្យការតភ្ជាប់ ហើយព្យាយាមម្តងទៀត។" });
       }
     }
     loadEntry();
@@ -36,13 +36,13 @@ export default function EntryEditor({ id }) {
     content = <p style={styles.description}>Checking your account...</p>;
   } else if (!user) {
     content = <div style={styles.loginPrompt}>
-      <p role="alert" style={styles.loginMessage}>{authError || "Please log in to edit an entry you own."}</p>
+      <p role="alert" style={styles.loginMessage}>{authError || "Please log in to edit an entry you own. សូមចូលគណនី ដើម្បីកែប្រែការចូលរួមរបស់អ្នក។"}</p>
       <Link href="/login" style={styles.loginButton}>Log in</Link>
     </div>;
   } else if (record.loading || record.userId !== user.id || (record.entry && record.entry.id !== id)) {
     content = <p style={styles.description}>Loading your entry...</p>;
   } else if (record.error || !record.entry || record.entry.owner !== user.id) {
-    content = <p role="alert" style={styles.message}>{record.error || "This entry is unavailable or you do not have permission to edit it."}</p>;
+    content = <p role="alert" style={styles.message}>{record.error || "This entry is unavailable or you do not have permission to edit it. ការចូលរួមនេះមិនអាចប្រើបាន ឬអ្នកមិនមានសិទ្ធិកែប្រែវាទេ។"}</p>;
   } else {
     content = <EntryEditForm key={`${id}:${user.id}`} entry={record.entry} supabase={supabase} />;
   }

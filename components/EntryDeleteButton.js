@@ -40,7 +40,7 @@ export default function EntryDeleteButton({ id, owner, title, supabase, onDelete
     } catch {
       setMessage(outcome?.deleted
         ? `${outcome.warning || "The entry was deleted."} Please return to the archive using the link below.`
-        : "Unable to confirm deletion. Please check the archive before trying again.");
+        : "Unable to confirm deletion. Please check the archive before trying again. មិនអាចបញ្ជាក់ការលុបបានទេ។ សូមពិនិត្យបណ្ណសារ មុនពេលព្យាយាមម្តងទៀត។");
     } finally {
       busy.current = false;
       setPending(false);

@@ -137,7 +137,7 @@ export default function ContributePage() {
     }
 
     if (!user) {
-      setSubmitError("Please log in before contributing an entry.");
+      setSubmitError("Please log in before contributing an entry. សូមចូលគណនី មុនពេលចូលរួមចំណែក។");
       return;
     }
 
@@ -253,13 +253,16 @@ export default function ContributePage() {
       <main style={styles.page}>
         <div style={styles.container}>
           {backLink}
-          <div style={styles.kicker}>CONTRIBUTE</div>
+          <div style={styles.kicker}>CONTRIBUTE / ចូលរួមចំណែក</div>
           <h1 style={styles.title}>Add to the archive</h1>
 
           <div style={styles.card}>
             <div style={styles.loginPrompt}>
               <p style={styles.loginMessage}>
                 You need to be logged in before you can contribute an entry.
+              </p>
+              <p className="khmer-text" style={styles.loginMessage}>
+                អ្នកត្រូវចូលគណនីជាមុនសិន ទើបអាចចូលរួមចំណែកបាន។
               </p>
               <a href="/login" style={styles.loginButton}>
                 Log in

@@ -43,7 +43,7 @@ export default function ReviewerTakeDown({ id, title }) {
     }
     setFinished(true);
     if (result.warning) {
-      setMessage("Taken down. The entry is deleted, but its photo could not be removed from Storage.");
+      setMessage("Taken down. The entry is deleted, but its photo could not be removed. បានដកចេញហើយ។ ការចូលរួមត្រូវបានលុប ប៉ុន្តែមិនអាចលុបរូបថតរបស់វាបានទេ។");
       return;
     }
     router.push("/");
