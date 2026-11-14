@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import collection from "../collection.config.js";
 import { createClient } from "../lib/supabase/client.js";
 import ReviewerNavLink from "./ReviewerNavLink.js";
 
@@ -46,10 +47,10 @@ export default function ArchiveNav({ current = "archive" }) {
 
   return (
     <nav className="archive-nav" aria-label="Primary navigation">
-      <Link className="archive-brand" href="/" aria-label="Khmer Traditional Music home">
+      <Link className="archive-brand" href="/" aria-label={`${collection.name} home`}>
         <span className="archive-brand-mark" aria-hidden="true">♫</span>
         <span>
-          <strong>Khmer Traditional Music</strong>
+          <strong>{collection.name}</strong>
           <small>Living cultural archive</small>
         </span>
       </Link>

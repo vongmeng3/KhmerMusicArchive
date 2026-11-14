@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import collection from "../collection.config.js";
 import { createClient } from "../lib/supabase/client.js";
 
 const styles = {
@@ -54,7 +55,7 @@ export default function AuthForm({ mode }) {
     setIsSubmitting(false);
 
     if (result.error) {
-      setMessage(isLogin ? "Invalid email or password" : "Unable to create account. Please check your details and try again.");
+      setMessage(isLogin ? "Invalid email or password. អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ។" : "Unable to create account. Please check your details and try again. មិនអាចបង្កើតគណនីបានទេ។ សូមពិនិត្យព័ត៌មានរបស់អ្នក ហើយព្យាយាមម្តងទៀត។");
       return;
     }
 
@@ -63,13 +64,13 @@ export default function AuthForm({ mode }) {
       return;
     }
 
-    setMessage("Account created. Check your email if confirmation is required.");
+    setMessage("Account created. Check your email if confirmation is required. គណនីត្រូវបានបង្កើតហើយ។ សូមពិនិត្យអ៊ីមែលរបស់អ្នក ប្រសិនបើត្រូវការការបញ្ជាក់។");
   }
 
   return (
     <main style={styles.page}>
       <section style={styles.card}>
-        <p style={styles.kicker}>KHMER LIVING ARCHIVE</p>
+        <p style={styles.kicker}>{collection.name.toUpperCase()}</p>
         <h1 style={styles.title}>{isLogin ? "Log in" : "Create an account"}</h1>
         <p style={styles.description}>{isLogin ? "Continue to your archive." : "Create an account to contribute to the archive."}</p>
         <form onSubmit={handleSubmit}>
